@@ -8,7 +8,10 @@ class Index
     
     public function __construct(){
         if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
-            rjson('不是post提交', '1', 'error');
+            rjson('不是post提交', '400', 'error');
+        }
+        if(empty(input("post.AKF100"))){
+            rjson("请先登录", '400', 'error');
         }
     }
     
@@ -65,7 +68,7 @@ class Index
            $where['BKC194'] = array("ELT", $data['outTime']);
         }
         
-        $list = Db::table("YD_KF51")->field("AAC003,AKF001,AKE020,AKC273")->where($where)->page($page_index, $page_size)->select();
+        $list = Db::table("YD_KF51")->field(" AKC190,AAC003,AKF001,AKE020,AKC273")->where($where)->page($page_index, $page_size)->select();
 
         rjson($list);
     }
