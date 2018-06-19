@@ -37,40 +37,71 @@ class Index
         $page_size = empty($data['page_size']) ? "10" : $data['page_size']; 
         
         $where = [];
+        
         //患者姓名
         if (!empty($data['AAC003']))
         {
-            $where['AAC003'] = array("LIKE", "%".$data['name']."%");
+            $where['YD_KF51.AAC003'] = array("LIKE", "%".$data['AAC003']."%");
         }
         //患者科室
         if (!empty($data['AKF001']))
         {
-            $where['AKF001'] = array('EQ', $data['department']);
+            $where['YD_KF51.AKF001'] = array('EQ', $data['AKF001']);
         }
         //患者床位
         if (!empty($data['AKE020']))
         {
-            $where['AKE020'] = array("EQ", $data['bedNumber']);
+            $where['YD_KF51.AKE020'] = array("EQ", $data['AKE020']);
         }
         //患者身份证
         if (!empty($data['AAC002']))
         {
-            $where['AAC002'] = array("EQ", $data['IDcode']);
+            $where['YD_KF51.AAC002'] = array("EQ", $data['AAC002']);
         }
         //入院时间
         if (!empty($data['BKC192']))
         {
-            $where['BKC192'] = array("EGT", $data['createTime']);
+            $where['YD_KF51.BKC192'] = array("EGT", $data['BKC192']);
         }
         //出院时间
         if (!empty($data['BKC194']))
         {
-           $where['BKC194'] = array("ELT", $data['outTime']);
+           $where['YD_KF51.BKC194'] = array("ELT", $data['BKC194']);
         }
+		
+		//
+		if (!empty($data['AKF002']))
+		{
+			$where['YD_KF52.AKF002'] = array("LIKE", "%".$data['AKF002']."%");
+		}
         
-        $list = Db::table("YD_KF51")->field(" AKC190,AAC003,AKF001,AKE020,AKC273")->where($where)->page($page_index, $page_size)->select();
-
+        $list = Db::table("YD_KF51")
+            ->field(" YD_KF51.AKC190, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002, YD_KF55.AKF055")
+			->join("YD_KF52", "YD_KF52.AKF001=YD_KF51.AKF001", "LEFT")
+			->where($where)->page($page_index, $page_size)->select();
         rjson($list);
+    }
+    
+    /**
+     * 获取图片
+     *  @param AAC999 个人管理编码
+     * */
+    public function getImage(){
+        
+        $data = input('post.');
+        if(empty($data['AAC999'])) rjson("参数不能为空", "400", "error");
+        
+        $where = array(
+            'AAC999'    => $data['AAC999']
+        );
+        $info = Db::table("YD_KF55")->where($where)->find();
+        
+        dump(stream_get_contents($info['AKF055']));die;
+        $content = fread($info['AKF055'], '4000');
+//         dump($content);
+        
+        $content = base64_encode($content);
+        dump($content);
     }
     
     /**
@@ -103,7 +134,7 @@ class Index
         $where = [];
         
         $where['AMS103'] = array("EQ", '1');    //状态1发布2停止
-        
+
         $list = Db::table("YD_MS101")->where($where)->page($page_index, $page_size)->order("AMS102 desc")->select();
         rjson($list);
     }
