@@ -96,12 +96,16 @@ class Index
         );
         $info = Db::table("YD_KF55")->where($where)->find();
         
-        dump(stream_get_contents($info['AKF055']));die;
-        $content = fread($info['AKF055'], '4000');
-//         dump($content);
+        $obj = stream_get_contents($info['AKF055']);
         
-        $content = base64_encode($content);
-        dump($content);
+        $path = "./image/".$data['AAC999'].".jpg";
+
+        if(file_put_contents($path, $obj)){
+            rjson(array('url'=>$path));
+        } else {
+            rjson("失败", "400", "error");
+        }
+
     }
     
     /**
