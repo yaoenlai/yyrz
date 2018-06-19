@@ -77,7 +77,7 @@ class Index
 		}
         
         $list = Db::table("YD_KF51")
-            ->field(" YD_KF51.AKC190, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002")
+            ->field(" YD_KF51.AKC190, YD_KF51.AAC002, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002")
 			->join("YD_KF52", "YD_KF52.AKF001=YD_KF51.AKF001", "LEFT")
 			->where($where)->page($page_index, $page_size)->select();
         rjson($list);
