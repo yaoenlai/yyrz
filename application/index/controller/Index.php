@@ -96,7 +96,9 @@ class Index
             'AAC999'    => $data['AAC999']
         );
         $info = Db::table("YD_KF55")->where($where)->find();
-        
+        if(empty($info)){
+            rjson("该身份证没有图片", "202", "error");
+        }
         $obj = stream_get_contents($info['AKF055']);
         
         $path = "./image/".$data['AAC999'].".jpg";
