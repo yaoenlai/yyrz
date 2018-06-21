@@ -5,7 +5,7 @@ use think\Db;
 
 class Index
 {
-    
+     
     public function __construct(){
 //         if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
 //             rjson('不是post提交', '400', 'error');
