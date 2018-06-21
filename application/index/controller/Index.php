@@ -7,12 +7,12 @@ class Index
 {
     
     public function __construct(){
-        if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
-            rjson('不是post提交', '400', 'error');
-        }
-        if(empty(input("post.AKF100"))){
-            rjson("请先登录", '400', 'error');
-        }
+//         if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
+//             rjson('不是post提交', '400', 'error');
+//         }
+//         if(empty(input("post.AKF100"))){
+//             rjson("请先登录", '400', 'error');
+//         }
         //添加验证登录凭证是否正确
     }
     
@@ -109,6 +109,36 @@ class Index
             rjson("失败", "400", "error");
         }
 
+    }
+    
+    /** 
+     * 认证
+     * 
+     * */
+    public function authentication(){
+        
+        $data = input("post.");
+        unset($data["AKF100"]);
+        
+        $where = array(
+            'AKC190'=>array('EQ', $data['AKC190']),
+        );
+        
+        $info = Db::table("YD_KF53")->where($where)->find();
+
+        $data['AAE001'] = date("Ymd");
+        $data['AAE030'] = date("YmdHis");
+        //判断是否已认证过
+        if(empty($info))
+        {
+            $aa = Db::table("YD_KF53")->insert($data);
+        } 
+        else 
+        {
+            unset($data['AKC190']);
+            $aa = Db::table("YD_KF53")->where($where)->update($data);
+        }
+        dump($aa);
     }
     
     /**
