@@ -87,6 +87,10 @@ class Connection extends BaseConnection
         return $info;
     }
 
+    public function getLastInsID($sequence = null){
+        return 1;
+    }
+    
     /**
      * SQL性能分析
      * @access protected
