@@ -118,27 +118,61 @@ class Index
     public function authentication(){
         
         $data = input("post.");
-        unset($data["AKF100"]);
         
+        if(empty($data['AKC190'])) rjson("流水号为空", "400", "error");
+            
         $where = array(
             'AKC190'=>array('EQ', $data['AKC190']),
         );
         
         $info = Db::table("YD_KF53")->where($where)->find();
 
-        $data['AAE001'] = date("Ymd");
-        $data['AAE030'] = date("YmdHis");
+        $list = array(
+            "AKC190"    => $data['AKC190'],            
+            'AAE001'    => date("Ymd"),
+            'AAE030'    => date("YmdHis"),
+        );
+        
+        if(!empty($data['AAC001'])) $list['AAC001'] = $data['AAC001'];
+        if(!empty($data['AKF050'])) $list['AKF050'] = $data['AKF050'];
+        if(!empty($data['AKF051'])) $list['AKF051'] = $data['AKF051'];
+        if(!empty($data['AKF052'])) $list['AKF052'] = $data['AKF052'];
+        if(!empty($data['AKF053'])) $list['AKF053'] = $data['AKF053'];
+        if(!empty($data['AAA027'])) $list['AAA027'] = $data['AAA027'];
+        if(empty($data['AKB020']))
+        {
+            rjson("医院编码不能为空", "400", "error");
+        }
+        else 
+        {
+            $list['AKB020'] = $data['AKB020'];
+        }
+        if(!empty($data['AKF056'])) $list['AKF056'] = $data['AKF056'];
+        
         //判断是否已认证过
         if(empty($info))
         {
-            $aa = Db::table("YD_KF53")->insert($data);
+            if(Db::table("YD_KF53")->insert($list))
+            {
+                rjson("新添认证成功");
+            } 
+            else
+            {
+                rjson("新添认证失败", "400", "error");
+            }
         } 
         else 
         {
             unset($data['AKC190']);
-            $aa = Db::table("YD_KF53")->where($where)->update($data);
+            if(Db::table("YD_KF53")->where($where)->update($list))
+            {
+                rjson("更新认证成功");
+            }
+            else 
+            {
+                rjson("更新认证失败", "400", "error");
+            }
         }
-        dump($aa);
     }
     
     /**
