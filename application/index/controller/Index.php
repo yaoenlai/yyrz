@@ -7,12 +7,12 @@ class Index
 {
      
     public function __construct(){
-//         if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
-//             rjson('不是post提交', '400', 'error');
-//         }
-//         if(empty(input("post.AKF100"))){
-//             rjson("请先登录", '400', 'error');
-//         }
+        if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
+            rjson('不是post提交', '400', 'error');
+        }
+        if(empty(input("post.AKF100"))){
+            rjson("请先登录", '400', 'error');
+        }
         //添加验证登录凭证是否正确
     }
     
