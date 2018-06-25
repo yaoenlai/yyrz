@@ -176,7 +176,7 @@ class Index
             'AKC190'=>array('EQ', $data['AKC190']),
         );
         $info = Db::table("YD_DETAIL")->where($where)->select();
-        $info['AAE030'] = Db::table("YD_KF53")->where(array("AKC190"=>"BKC190"))->value("AAE030");
+        $info['AAE030'] = Db::table("YD_KF53")->where(array("AKC190"=>"AKC190"))->value("AAE030");
         rjson($info);
     }
     
