@@ -126,7 +126,8 @@ class Index
         );       
 
         $list = array(
-            "AKC190"    => $data['AKC190'],            
+            "AKC190"    => $data['AKC190'],  
+            'AKF120'    => 2,
             'AAE001'    => date("Ymd"),
             'AAE030'    => date("YmdHis"),
         );
