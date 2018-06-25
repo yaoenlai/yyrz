@@ -123,9 +123,7 @@ class Index
             
         $where = array(
             'AKC190'=>array('EQ', $data['AKC190']),
-        );
-        
-        $info = Db::table("YD_KF53")->where($where)->find();
+        );       
 
         $list = array(
             "AKC190"    => $data['AKC190'],            
@@ -149,30 +147,16 @@ class Index
         }
         if(!empty($data['AKF056'])) $list['AKF056'] = $data['AKF056'];
         
-        //判断是否已认证过
-        if(empty($info))
+        //住院考勤添加
+        if(Db::table("YD_KF53")->insert($list))
         {
-            if(Db::table("YD_KF53")->insert($list))
-            {
-                rjson("新添认证成功");
-            } 
-            else
-            {
-                rjson("新添认证失败", "400", "error");
-            }
+            rjson("新添认证成功");
         } 
-        else 
+        else
         {
-            unset($data['AKC190']);
-            if(Db::table("YD_KF53")->where($where)->update($list))
-            {
-                rjson("更新认证成功");
-            }
-            else 
-            {
-                rjson("更新认证失败", "400", "error");
-            }
+            rjson("新添认证失败", "400", "error");
         }
+
     }
     
     /**
@@ -192,6 +176,7 @@ class Index
             'AKC190'=>array('EQ', $data['AKC190']),
         );
         $info = Db::table("YD_DETAIL")->where($where)->select();
+        $info['AAE030'] = Db::table("YD_KF53")->where(array("AKC190"=>"BKC190"))->value("AAE030");
         rjson($info);
     }
     
