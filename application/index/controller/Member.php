@@ -23,7 +23,7 @@ class Member
            'AFK101' => $data['AFK101'],
            'AKG105' => $data['AKG105'],
        );
-       $list = Db::name("KF99")->where($where)->select();
+       $list = Db::table("YD_KF99")->where($where)->select();
        if(empty($list)){
            rjson("账号或密码错误", '400', 'error');
        } else {

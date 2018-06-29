@@ -171,13 +171,15 @@ class Index
     public function hospitalizationDetail(){
         
         $data = input('post.');
-        if(empty($data['AKC190'])) rjson('参数不能为空', '400', 'error');
+//         if(empty($data['AKC190'])) rjson('参数不能为空', '400', 'error');
     
-        $where = array(
-            'AKC190'=>array('EQ', $data['AKC190']),
-        );
+        $where = [];
+        
+        if(!empty($data['AKC190'])) $where['AKC190']=$data['AKC190'];
+        if(!empty($data['AAC002'])) $where['AAC002']=$data['AAC002'];
+        
         $info = Db::table("YD_DETAIL")->where($where)->order("AAE030 desc")->find();
-//         $info['AAE030'] = Db::table("YD_KF53")->where(array("AKC190"=>$info["AKC190"]))->order("AAE030 desc")->value("AAE030");
+        $info['KF54'] = Db::table("YD_KF54")->where(array("AKC190"=>$info["AKC190"]))->order("AAE030 desc")->select();
         rjson($info);
     }
     
@@ -191,6 +193,7 @@ class Index
         $where = [];
         
         $where['AMS103'] = array("EQ", '1');    //状态1发布2停止
+//         $where['AMS104'] = empty($data['AMS104']) ? "3" : $data['AMS104'];
 
         $list = Db::table("YD_MS101")->where($where)->page($page_index, $page_size)->order("AMS102 desc")->select();
         rjson($list);
