@@ -198,6 +198,30 @@ class Index
         $list = Db::table("YD_MS101")->where($where)->page($page_index, $page_size)->order("AMS102 desc")->select();
         rjson($list);
     }
+    
+    /** 
+     * 上传文件
+     *  */
+    public function upload(){
+        // 获取表单上传文件 例如上传了001.jpg
+        $file = request()->file('fileName');
+        // 移动到框架应用根目录/public/uploads/ 目录下
+        $info = $file->validate(['size'=>15678000,'ext'=>'jpg,png,gif,mp4'])->move(ROOT_PATH . 'public' . DS . 'uploads');
+
+        if($info){
+            // 成功上传后 获取上传信息
+            $list = array(
+                'ext'   => $info->getExtension(),
+                'path'  => $info->getSaveName(),
+                'name'  => $info->getFilename(),
+            );
+            rjson($list);
+        }else{
+            // 上传失败获取错误信息
+            rjson($file->getError(), '400', 'error');
+        }
+    }
+    
     //获取天气  https://www.sojson.com/api/weather.html
     public function weatherList(){
         
