@@ -138,6 +138,8 @@ class Index
         if(!empty($data['AKF052'])) $list['AKF052'] = $data['AKF052'];
         if(!empty($data['AKF053'])) $list['AKF053'] = $data['AKF053'];
         if(!empty($data['AAA027'])) $list['AAA027'] = $data['AAA027'];
+        if(!empty($data['AKF119'])) $list['AKF119'] = $data['AKF119'];
+        
         if(empty($data['AKB020']))
         {
             rjson("医院编码不能为空", "400", "error");
