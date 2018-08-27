@@ -7,12 +7,12 @@ class Index
 {
      
     public function __construct(){
-//         if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
-//             rjson('不是post提交', '400', 'error');
-//         }
-//         if(empty(input("post.AKF100"))){
-//             rjson("请先登录", '400', 'error');
-//         }
+        if(!isset($_SERVER['REQUEST_METHOD']) || strtoupper($_SERVER['REQUEST_METHOD'])!='POST'){
+            rjson('不是post提交', '400', 'error');
+        }
+        if(empty(input("post.AKF100"))){
+            rjson("请先登录", '400', 'error');
+        }
         //添加验证登录凭证是否正确
     }
     
@@ -123,12 +123,11 @@ class Index
             
         $where = array(
             'AKC190'=>array('EQ', $data['AKC190']),
-        );
-        
-        $info = Db::table("YD_KF53")->where($where)->find();
+        );       
 
         $list = array(
-            "AKC190"    => $data['AKC190'],            
+            "AKC190"    => $data['AKC190'],  
+            'AKF120'    => 2,
             'AAE001'    => date("Ymd"),
             'AAE030'    => date("YmdHis"),
         );
@@ -139,6 +138,8 @@ class Index
         if(!empty($data['AKF052'])) $list['AKF052'] = $data['AKF052'];
         if(!empty($data['AKF053'])) $list['AKF053'] = $data['AKF053'];
         if(!empty($data['AAA027'])) $list['AAA027'] = $data['AAA027'];
+        if(!empty($data['AKF119'])) $list['AKF119'] = $data['AKF119'];
+        
         if(empty($data['AKB020']))
         {
             rjson("医院编码不能为空", "400", "error");
@@ -149,30 +150,16 @@ class Index
         }
         if(!empty($data['AKF056'])) $list['AKF056'] = $data['AKF056'];
         
-        //判断是否已认证过
-        if(empty($info))
+        //住院考勤添加
+        if(Db::table("YD_KF53")->insert($list))
         {
-            if(Db::table("YD_KF53")->insert($list))
-            {
-                rjson("新添认证成功");
-            } 
-            else
-            {
-                rjson("新添认证失败", "400", "error");
-            }
+            rjson("新添认证成功");
         } 
-        else 
+        else
         {
-            unset($data['AKC190']);
-            if(Db::table("YD_KF53")->where($where)->update($list))
-            {
-                rjson("更新认证成功");
-            }
-            else 
-            {
-                rjson("更新认证失败", "400", "error");
-            }
+            rjson("新添认证失败", "400", "error");
         }
+
     }
     
     /**
@@ -186,12 +173,15 @@ class Index
     public function hospitalizationDetail(){
         
         $data = input('post.');
-        if(empty($data['AKC190'])) rjson('参数不能为空', '400', 'error');
+//         if(empty($data['AKC190'])) rjson('参数不能为空', '400', 'error');
     
-        $where = array(
-            'AKC190'=>array('EQ', $data['AKC190']),
-        );
-        $info = Db::table("YD_DETAIL")->where($where)->select();
+        $where = [];
+        
+        if(!empty($data['AKC190'])) $where['AKC190']=$data['AKC190'];
+        if(!empty($data['AAC002'])) $where['AAC002']=$data['AAC002'];
+        
+        $info = Db::table("YD_DETAIL")->where($where)->order("AAE030 desc")->find();
+        $info['KF54'] = Db::table("YD_KF54")->where(array("AKC190"=>$info["AKC190"]))->order("AAE030 desc")->select();
         rjson($info);
     }
     
@@ -205,10 +195,35 @@ class Index
         $where = [];
         
         $where['AMS103'] = array("EQ", '1');    //状态1发布2停止
+//         $where['AMS104'] = empty($data['AMS104']) ? "3" : $data['AMS104'];
 
         $list = Db::table("YD_MS101")->where($where)->page($page_index, $page_size)->order("AMS102 desc")->select();
         rjson($list);
     }
+    
+    /** 
+     * 上传文件
+     *  */
+    public function upload(){
+        // 获取表单上传文件 例如上传了001.jpg
+        $file = request()->file('fileName');
+        // 移动到框架应用根目录/public/uploads/ 目录下
+        $info = $file->validate(['size'=>15678000,'ext'=>'jpg,png,gif,mp4'])->move(ROOT_PATH . 'public' . DS . 'uploads');
+
+        if($info){
+            // 成功上传后 获取上传信息
+            $list = array(
+                'ext'   => $info->getExtension(),
+                'path'  => $info->getSaveName(),
+                'name'  => $info->getFilename(),
+            );
+            rjson($list);
+        }else{
+            // 上传失败获取错误信息
+            rjson($file->getError(), '400', 'error');
+        }
+    }
+    
     //获取天气  https://www.sojson.com/api/weather.html
     public function weatherList(){
         
