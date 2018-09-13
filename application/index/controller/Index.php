@@ -75,9 +75,14 @@ class Index
 		{
 			$where['YD_KF52.AKF002'] = array("LIKE", "%".$data['AKF002']."%");
 		}
-        
+        //医院编码
+        if(!empty($data['AKB021']))
+        {
+            $where['YD_KF52.AKB021'] = array("EQ", $data['AKB021']);
+        }
+		
         $list = Db::table("YD_KF51")
-            ->field(" YD_KF51.AKC190, YD_KF51.AAC002, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002")
+            ->field(" YD_KF51.AKC190, YD_KF51.AAC002, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002, YD_KF52.AKB021")
 			->join("YD_KF52", "YD_KF52.AKF001=YD_KF51.AKF001", "LEFT")
 			->where($where)->page($page_index, $page_size)->select();
         rjson($list);
@@ -121,10 +126,6 @@ class Index
         
         if(empty($data['AKC190'])) rjson("流水号为空", "400", "error");
             
-        $where = array(
-            'AKC190'=>array('EQ', $data['AKC190']),
-        );       
-
         $list = array(
             "AKC190"    => $data['AKC190'],  
             'AKF120'    => 2,
@@ -150,14 +151,39 @@ class Index
         }
         if(!empty($data['AKF056'])) $list['AKF056'] = $data['AKF056'];
         
-        //住院考勤添加
-        if(Db::table("YD_KF53")->insert($list))
+        //判断验证
+        $where = array(
+            'AKC190'=>array('EQ', $data['AKC190']),
+            'AAE001'=>date("Ymd"),
+        );
+        $info = Db::table("YD_KF53")->where($where)->order('AAE030 DESC')->find();
+        if(!empty($info))
         {
-            rjson("新添认证成功");
+            if( ($info['AKF050'] == '0') || (empty($info['AKF119'])) )
+            {
+                if( Db::table("YD_KF53")->where($where)->update($list) )
+                {
+                    rjson('修改认证成功');
+                }
+                else
+                {
+                    rjson("修改认证失败", "400", "error");
+                }
+            } else {
+                rjson("新添认证失败，今天已成功认证完成", "400", "error");
+            }
         } 
-        else
+        else 
         {
-            rjson("新添认证失败", "400", "error");
+            //住院考勤添加
+            if(Db::table("YD_KF53")->insert($list))
+            {
+                rjson("新添认证成功");
+            } 
+            else
+            {
+                rjson("新添认证失败", "400", "error");
+            }
         }
 
     }
