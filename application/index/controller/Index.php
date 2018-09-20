@@ -45,6 +45,17 @@ class Index
         
         $where = [];
         
+        switch ($type){
+            case '1': 
+                $where['YD_KF51.BKC317'] = array('EQ', '0');
+                break;
+            case '2':
+                $where['YD_KF51.BKC317'] = array('EQ', '1');
+                break;
+            default:
+                break;
+        }
+        
         //患者姓名
         if (!empty($data['AAC003']))
         {
