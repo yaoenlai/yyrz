@@ -25,7 +25,13 @@ class Index
     //医院科室列表
     public function departmentList(){
         
-        $data = Db::table("YD_KF52")->select();
+        $data = input('post.');
+        $where = [];
+        //医院编码
+        if(!empty($data['AKB020'])){
+            $where['AKB020'] = $data['AKB020'];
+        }
+        $data = Db::table("YD_KF52")->where($where)->select();
         rjson($data);
     }
     //住院、出院 查询
@@ -44,12 +50,12 @@ class Index
         {
             $where['YD_KF51.AAC003'] = array("LIKE", "%".$data['AAC003']."%");
         }
-        //患者科室
+        //患者科室号
         if (!empty($data['AKF001']))
         {
             $where['YD_KF51.AKF001'] = array('EQ', $data['AKF001']);
         }
-        //患者床位
+        //患者床位号
         if (!empty($data['AKE020']))
         {
             $where['YD_KF51.AKE020'] = array("EQ", $data['AKE020']);
@@ -69,8 +75,7 @@ class Index
         {
            $where['YD_KF51.BKC194'] = array("ELT", $data['BKC194']);
         }
-		
-		//
+		//科室名称（废弃）
 		if (!empty($data['AKF002']))
 		{
 			$where['YD_KF52.AKF002'] = array("LIKE", "%".$data['AKF002']."%");
@@ -78,11 +83,11 @@ class Index
         //医院编码
         if(!empty($data['AKB020']))
         {
-            $where['YD_KF52.AKB020'] = array("EQ", $data['AKB020']);
+            $where['YD_KF51.AKB020'] = array("EQ", $data['AKB020']);
         }
 		
         $list = Db::table("YD_KF51")
-            ->field(" YD_KF51.AKC190, YD_KF51.AAC002, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002, YD_KF52.AKB020")
+            ->field(" YD_KF51.AKC190, YD_KF51.AAC002, YD_KF51.AAC003, YD_KF51.AKF001, YD_KF51.AKE020, YD_KF51.AKC273, YD_KF52.AKF002, YD_KF51.AKB020, YD_KF51.BKC317")
 			->join("YD_KF52", "YD_KF52.AKF001=YD_KF51.AKF001", "LEFT")
 			->where($where)->page($page_index, $page_size)->select();
         rjson($list);
@@ -128,7 +133,7 @@ class Index
             
         $list = array(
             "AKC190"    => $data['AKC190'],  
-            'AKF120'    => 2,
+//             'AKF120'    => 2,
             'AAE001'    => date("Ymd"),
             'AAE030'    => date("YmdHis"),
         );
@@ -140,6 +145,8 @@ class Index
         if(!empty($data['AKF053'])) $list['AKF053'] = $data['AKF053'];
         if(!empty($data['AAA027'])) $list['AAA027'] = $data['AAA027'];
         if(!empty($data['AKF119'])) $list['AKF119'] = $data['AKF119'];
+        if(!empty($data['AKF110'])) $list['AKF110'] = $data['AKF110'];
+        if(!empty($data['AKF120'])) $list['AKF120'] = $data['AKF120'];
         
         if(empty($data['AKB020']))
         {
@@ -153,13 +160,14 @@ class Index
         
         //判断验证
         $where = array(
-            'AKC190'=>array('EQ', $data['AKC190']),
-            'AAE001'=>date("Ymd"),
+            'AKC190'    =>array('EQ', $data['AKC190'])
+            ,'AAE001'   =>date("Ymd")
         );
         $info = Db::table("YD_KF53")->where($where)->order('AAE030 DESC')->find();
         if(!empty($info))
         {
-            if( ($info['AKF050'] == '0') || (empty($info['AKF119'])) )
+//             if( ($info['AKF050'] == '0') || (empty($info['AKF119'])) )
+            if( ($info['AKF120'] != 2) && (!empty($info['AKF050']) || !empty($info['AKF052']) ))
             {
                 if( Db::table("YD_KF53")->where($where)->update($list) )
                 {
@@ -233,14 +241,26 @@ class Index
     public function upload(){
         // 获取表单上传文件 例如上传了001.jpg
         $file = request()->file('fileName');
-        // 移动到框架应用根目录/public/uploads/ 目录下
-        $info = $file->validate(['size'=>15678000,'ext'=>'jpg,png,gif,mp4'])->move(ROOT_PATH . 'public' . DS . 'uploads');
+        //获取绝对目录
+        if(empty(config('file_path'))){
+            $ROOT_PATH = ROOT_PATH;
+        } else {
+            $ROOT_PATH= config('file_path');
+        }
+        //获取子目录
+        if( in_array(strtolower(pathinfo($_FILES['fileName']['name'], PATHINFO_EXTENSION)), ['jpg', 'png', 'gif']) ){
+            $subdirectory = '/image/';
+        } else {
+            $subdirectory = '/video/';
+        }
+        
+        $info = $file->validate(['size'=>15678000,'ext'=>'jpg,png,gif,mp4'])->move($ROOT_PATH.$subdirectory);
 
         if($info){
             // 成功上传后 获取上传信息
             $list = array(
                 'ext'   => $info->getExtension(),
-                'path'  => $info->getSaveName(),
+                'path'  => $subdirectory.$info->getSaveName(),
                 'name'  => $info->getFilename(),
             );
             rjson($list);

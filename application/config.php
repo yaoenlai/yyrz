@@ -17,7 +17,7 @@ return [
     // 应用调试模式
     'app_debug'              => true,
     // 应用Trace
-    'app_trace'              => true,
+    'app_trace'              => false,
     // 应用模式状态
     'app_status'             => '',
     // 是否支持多模块
@@ -236,4 +236,7 @@ return [
         'var_page'  => 'page',
         'list_rows' => 15,
     ],
+    
+    //上传绝对路径
+    'file_path'     => 'E:/web/',
 ];
