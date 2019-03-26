@@ -11,7 +11,4 @@
 
 // 应用公共文件
 
-function rjson($data, $code='200', $msg='success'){
-    
-    echo json_encode(array('status'=>$code,'message'=>$msg,'data'=>$data));die;
-}
+
